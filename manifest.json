@@ -1,0 +1,58 @@
+{
+  "manifest_version": 3,
+  "name": "StudyFlow - Productivity Tracker",
+  "version": "2.0",
+  "description": "Gamified habit tracker and distraction blocker for students. Includes XP, streaks, site blocking, focus sessions, and more.",
+  "permissions": [
+    "storage",
+    "tabs",
+    "activeTab",
+    "declarativeNetRequest",
+    "declarativeNetRequestWithHostAccess",
+    "notifications",
+    "alarms",
+    "scripting",
+    "webNavigation",
+    "history",
+    "idle",
+    "bookmarks"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "options_page": "options.html",
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content.js"
+      ]
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; style-src 'self' 'unsafe-inline' data:;"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "icons/*"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ]
+}

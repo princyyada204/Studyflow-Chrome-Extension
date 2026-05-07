@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyFlow Pomodoro Timer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(90deg, #E8A598 0%, #FFB5A7 50%, #FEC5BB 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+
+        .container {
+            background: #FEC5BB;
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #E8A598, #FFB5A7, #FEC5BB);
+            background-size: 200% 100%;
+            animation: rainbow 3s ease-in-out infinite;
+        }
+
+        @keyframes rainbow {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #4a5568;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #718096;
+            font-size: 1.1rem;
+            font-weight: 300;
+        }
+
+        .timer-display {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 20px;
+            padding: 40px 20px;
+            margin: 30px 0;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(240, 147, 251, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .timer-display::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .timer {
+            font-size: 4rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .timer-label {
+            font-size: 1.2rem;
+            font-weight: 500;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            min-width: 120px;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #FFB5A7, #E8A598);
+            color: #222;
+            box-shadow: 0 4px 15px rgba(232, 165, 152, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(232, 165, 152, 0.6);
+            background: linear-gradient(135deg, #E8A598, #FFB5A7);
+            color: #fff;
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #FEC5BB, #FFB5A7);
+            color: #222;
+            box-shadow: 0 4px 15px rgba(254, 197, 187, 0.4);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(254, 197, 187, 0.6);
+            background: linear-gradient(135deg, #FFB5A7, #FEC5BB);
+            color: #fff;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #E8A598, #FEC5BB);
+            color: #222;
+            box-shadow: 0 4px 15px rgba(232, 165, 152, 0.4);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(232, 165, 152, 0.6);
+            background: linear-gradient(135deg, #FEC5BB, #E8A598);
+            color: #fff;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .settings-toggle {
+            background: none;
+            border: none;
+            color: #667eea;
+            font-size: 1.5rem;
+            cursor: pointer;
+            margin: 20px 0;
+            transition: transform 0.3s ease;
+        }
+
+        .settings-toggle:hover {
+            transform: rotate(180deg);
+        }
+
+        .settings-panel {
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .settings-panel.show {
+            display: block;
+        }
+
+        .setting-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 15px 0;
+            padding: 10px 0;
+        }
+
+        .setting-group label {
+            font-weight: 500;
+            color: #4a5568;
+            flex: 1;
+            text-align: left;
+        }
+
+        .setting-group input {
+            width: 80px;
+            padding: 8px 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            text-align: center;
+            transition: border-color 0.3s ease;
+        }
+
+        .setting-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+            position: relative;
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .session-info {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+            font-size: 0.9rem;
+            color: #718096;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .floating-shapes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .shape {
+            position: absolute;
+            opacity: 0.1;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .shape:nth-child(1) {
+            top: 10%;
+            left: 10%;
+            width: 20px;
+            height: 20px;
+            background: #667eea;
+            border-radius: 50%;
+            animation-delay: 0s;
+        }
+
+        .shape:nth-child(2) {
+            top: 20%;
+            right: 15%;
+            width: 15px;
+            height: 15px;
+            background: #f093fb;
+            border-radius: 50%;
+            animation-delay: 2s;
+        }
+
+        .shape:nth-child(3) {
+            bottom: 20%;
+            left: 20%;
+            width: 25px;
+            height: 25px;
+            background: #4ecdc4;
+            border-radius: 50%;
+            animation-delay: 4s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        @keyframes celebration {
+            0% { 
+                transform: scale(0) rotate(0deg); 
+                opacity: 1; 
+            }
+            50% { 
+                transform: scale(1.5) rotate(180deg); 
+                opacity: 1; 
+            }
+            100% { 
+                transform: scale(0) rotate(360deg); 
+                opacity: 0; 
+            }
+        }
+
+        .alarm-settings {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #e2e8f0;
+        }
+
+        .alarm-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 10px 0;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 25px;
+            background: #cbd5e0;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .toggle-switch.active {
+            background: #667eea;
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 21px;
+            height: 21px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(25px);
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+
+            .timer {
+                font-size: 3rem;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Cute pomodoro SVGs as background decorations (darker colors, higher opacity) -->
+    <svg style="position: fixed; left: 5%; top: 10%; width: 60px; height: 60px; opacity: 0.45; z-index: 0;" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="30" cy="35" rx="22" ry="18" fill="#B22234"/>
+      <ellipse cx="30" cy="25" rx="10" ry="6" fill="#7A093A"/>
+      <rect x="27" y="10" width="6" height="12" rx="3" fill="#1B5E20"/>
+    </svg>
+    <svg style="position: fixed; right: 8%; top: 18%; width: 48px; height: 48px; opacity: 0.45; z-index: 0;" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="24" cy="24" r="20" fill="#FFD200"/>
+      <circle cx="24" cy="24" r="16" fill="#fff"/>
+      <rect x="22" y="10" width="4" height="14" rx="2" fill="#B22234"/>
+      <rect x="22" y="24" width="10" height="4" rx="2" fill="#B22234"/>
+    </svg>
+    <svg style="position: fixed; left: 12%; bottom: 12%; width: 56px; height: 48px; opacity: 0.45; z-index: 0;" viewBox="0 0 56 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="8" y="12" width="40" height="28" rx="6" fill="#fff" stroke="#B22234" stroke-width="2"/>
+      <rect x="16" y="20" width="24" height="12" rx="2" fill="#FFD200"/>
+      <rect x="20" y="24" width="16" height="4" rx="1" fill="#B22234"/>
+    </svg>
+    <svg style="position: fixed; right: 15%; bottom: 10%; width: 48px; height: 48px; opacity: 0.45; z-index: 0;" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="24" cy="36" rx="16" ry="8" fill="#FFD200"/>
+      <rect x="12" y="16" width="24" height="20" rx="8" fill="#fff" stroke="#B22234" stroke-width="2"/>
+      <rect x="20" y="28" width="8" height="4" rx="2" fill="#B22234"/>
+    </svg>
+    <div class="floating-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+
+    <!-- More cute pomodoro SVGs as background decorations (darker colors, higher opacity) -->
+    <svg style="position: fixed; left: 30%; top: 8%; width: 48px; height: 48px; opacity: 0.65; z-index: 0;" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="24" cy="28" rx="18" ry="14" fill="#B22234"/>
+      <rect x="18" y="10" width="12" height="10" rx="5" fill="#fff" stroke="#7A093A" stroke-width="2"/>
+      <rect x="22" y="6" width="4" height="8" rx="2" fill="#FFD200"/>
+      <rect x="14" y="18" width="20" height="4" rx="2" fill="#7A093A"/>
+    </svg>
+    <svg style="position: fixed; right: 25%; top: 5%; width: 40px; height: 40px; opacity: 0.65; z-index: 0;" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="20" cy="28" rx="12" ry="10" fill="#7A093A"/>
+      <ellipse cx="20" cy="16" rx="8" ry="8" fill="#fff"/>
+      <rect x="18" y="6" width="4" height="8" rx="2" fill="#1B5E20"/>
+    </svg>
+    <svg style="position: fixed; left: 18%; bottom: 8%; width: 36px; height: 36px; opacity: 0.65; z-index: 0;" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M18 34 Q10 24 18 18 Q26 24 18 34 Z" fill="#1B5E20" stroke="#0D47A1" stroke-width="2"/>
+    </svg>
+    <svg style="position: fixed; right: 18%; bottom: 8%; width: 36px; height: 36px; opacity: 0.65; z-index: 0;" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="6" y="6" width="24" height="24" rx="6" fill="#7A093A"/>
+      <rect x="10" y="10" width="16" height="16" rx="3" fill="#fff"/>
+    </svg>
+    <svg style="position: fixed; left: 50%; top: 90%; width: 32px; height: 32px; opacity: 0.65; z-index: 0; transform: translateX(-50%);" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="16,2 19,12 30,12 21,19 24,30 16,23 8,30 11,19 2,12 13,12" fill="#FFD200" stroke="#7A093A" stroke-width="1.5"/>
+    </svg>
+
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-clock"></i> Pomodoro Timer</h1>
+            <p>Stay focused, stay productive! 🎯</p>
+        </div>
+
+        <div class="timer-display">
+            <div class="timer" id="timer">25:00</div>
+            <div class="timer-label" id="timerLabel">Focus Time</div>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+        </div>
+
+        <div class="session-info">
+            <span>Session: <span id="sessionCount">1</span>/4</span>
+            <span>Total Time: <span id="totalTime">0:00</span></span>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" id="startBtn">
+                <i class="fas fa-play"></i> Start
+            </button>
+            <button class="btn btn-secondary" id="pauseBtn" style="display: none;">
+                <i class="fas fa-pause"></i> Pause
+            </button>
+            <button class="btn btn-danger" id="resetBtn">
+                <i class="fas fa-redo"></i> Reset
+            </button>
+        </div>
+
+        <button class="settings-toggle" id="settingsToggle">
+            <i class="fas fa-cog"></i>
+        </button>
+
+        <div class="settings-panel" id="settingsPanel">
+            <h3 style="margin-bottom: 20px; color: #4a5568;">Timer Settings</h3>
+            
+            <div class="setting-group">
+                <label>Focus Duration (min):</label>
+                <input type="number" id="focusDuration" value="25" min="1" max="120">
+            </div>
+            
+            <div class="setting-group">
+                <label>Break Duration (min):</label>
+                <input type="number" id="breakDuration" value="5" min="1" max="30">
+            </div>
+            
+            <div class="setting-group">
+                <label>Long Break (min):</label>
+                <input type="number" id="longBreakDuration" value="15" min="1" max="60">
+            </div>
+
+            <div class="alarm-settings">
+                <h4 style="margin-bottom: 15px; color: #4a5568;">Alarm Settings</h4>
+                
+                <div class="alarm-toggle">
+                    <span>Sound Alarm</span>
+                    <div class="toggle-switch" id="soundToggle">
+                        <div class="toggle-switch"></div>
+                    </div>
+                </div>
+                
+                <div class="alarm-toggle">
+                    <span>Desktop Notification</span>
+                    <div class="toggle-switch" id="notificationToggle">
+                        <div class="toggle-switch"></div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" id="saveSettings" style="margin-top: 20px;">
+                <i class="fas fa-save"></i> Save Settings
+            </button>
+        </div>
+    </div>
+    <div style="text-align: center; margin-top: 32px;">
+      <!-- Remove the download link/button below -->
+    </div>
+
+    <div class="notification" id="notification">
+        <i class="fas fa-bell"></i> Time's up! Take a break! 🎉
+    </div>
+
+    <script src="pomodoro.js"></script>
+</body>
+</html> 
